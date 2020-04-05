@@ -26,10 +26,13 @@ classdef DLCameraBase < handle
             obj.layerName = layerName;
         end
         
-        function initialize(obj)
+        function initialize(obj, webcamNum)
             obj.japaneseLabels = ReadJsonLabel('label.json');
+            if ~exist('webcamNum','var')
+                webcamNum = 1;
+            end            
             if ~exist('camera','var')
-                obj.camera = webcam(1);
+                obj.camera = webcam(webcamNum);
             end
             obj.inputSize = obj.net.Layers(1).InputSize(1:2);
             obj.classes = obj.net.Layers(end).Classes;
