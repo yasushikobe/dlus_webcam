@@ -4,7 +4,9 @@ classdef DLCameraSqueezenet < DLCameraBase
             obj.netName = "squeezenet";
             obj.layerName = "relu_conv10";            
         end
-        
+    end
+    
+    methods (Access = protected)
         function [scores, classIds, classActivationMap] = calc_score(~, imageActivations)
             scores = squeeze(mean(imageActivations,[1 2]));
             [~,classIds] = maxk(scores,3);

@@ -58,7 +58,9 @@ classdef DLCameraBase < handle
                 toc
             end
         end
-
+    end
+    
+    methods (Access = protected)
         function [scores, classIds, classActivationMap] = calc_score(obj, imageActivations)
             scores = squeeze(mean(imageActivations,[1 2]));
             fcWeights = obj.net.Layers(end-2).Weights;
@@ -69,7 +71,9 @@ classdef DLCameraBase < handle
             classActivationMap = sum(imageActivations.*weightVector,3);
             scores = exp(scores)/sum(exp(scores));     
         end
-        
+    end
+    
+    methods (Access = private)
         function show_cam(obj, im, CAM)
             imSize = size(im);
             CAM = imresize(CAM,imSize(1:2));
@@ -82,7 +86,7 @@ classdef DLCameraBase < handle
             combinedImage = obj.normalizeImage(combinedImage)*255;
             imshow(uint8(combinedImage));
         end
-
+        
         function N = normalizeImage(~, I)
             minimum = min(I(:));
             maximum = max(I(:));
