@@ -62,7 +62,6 @@ classdef DLCameraBase < handle
             subplot(1, 2, 2)
             combinedImage = obj.getCombinedImage(im,classActivationMap);
             imshow(combinedImage);
-            
             %title(string(labels) + ", " + string(maxScores));
             titleLabel1 = sprintf('%s : %.1f%%', obj.japaneseLabels.getJpName(classIds(1)), maxScores(1) * 100);
             title(titleLabel1);
