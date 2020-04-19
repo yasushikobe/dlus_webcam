@@ -40,31 +40,42 @@ classdef DLCameraBase < handle
         end
         
         function run(obj)
+            count = 0;
             while ishandle(obj.figureHandle)
-                tic
-                im = snapshot(obj.camera); %カメラ画像情報の取得
-                imResized = imresize(im,[obj.inputSize(1), NaN]); % ネットワークごとに入力サイズが異なるので変更
-                imageActivations = activations(obj.net,imResized,obj.layerName);    
-                [scores, classIds, classActivationMap] = obj.calc_score(imageActivations);
-                maxScores = scores(classIds);
-                %labels = obj.classes(classIds);
-                subplot(1, 2, 1)
-                imshow(im)
-                subplot(1, 2, 2)
-                combinedImage = obj.getCombinedImage(im,classActivationMap);
-                imshow(combinedImage);
-                %title(string(labels) + ", " + string(maxScores));
-                titleLabel1 = sprintf('%s : %.1f%%', obj.japaneseLabels.getJpName(classIds(1)), maxScores(1) * 100);
-                title(titleLabel1);
-                ax = gca;
-                ax.TitleFontSizeMultiplier = 2;
-                drawnow
-                toc
+                count = count + 1;
+                elaps = obj.getTicToc(@obj.mainLoop);
+                fprintf('%03d： 経過時間は %.4f 秒です\n',count,elaps)
             end
         end
     end
     
     methods (Access = protected)
+        function mainLoop(obj)
+            im = snapshot(obj.camera); %カメラ画像情報の取得
+            imResized = imresize(im,[obj.inputSize(1), NaN]); % ネットワークごとに入力サイズが異なるので変更
+            imageActivations = activations(obj.net,imResized,obj.layerName);    
+            [scores, classIds, classActivationMap] = obj.calc_score(imageActivations);
+            maxScores = scores(classIds);
+            %labels = obj.classes(classIds);
+            subplot(1, 2, 1)
+            imshow(im)
+            subplot(1, 2, 2)
+            combinedImage = obj.getCombinedImage(im,classActivationMap);
+            imshow(combinedImage);
+            %title(string(labels) + ", " + string(maxScores));
+            titleLabel1 = sprintf('%s : %.1f%%', obj.japaneseLabels.getJpName(classIds(1)), maxScores(1) * 100);
+            title(titleLabel1);
+            ax = gca;
+            ax.TitleFontSizeMultiplier = 2;
+            drawnow            
+        end
+        
+        function elaps = getTicToc(~,func)
+            tic
+            func()
+            elaps = toc;
+        end
+        
         function [scores, classIds, classActivationMap] = calc_score(obj, imageActivations)
             scores = squeeze(mean(imageActivations,[1 2]));
             fcWeights = obj.net.Layers(end-2).Weights;
