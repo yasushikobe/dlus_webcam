@@ -42,8 +42,8 @@ classdef DLCameraBase < handle
         function run(obj)
             while ishandle(obj.figureHandle)
                 tic
-                im = snapshot(obj.camera);
-                imResized = imresize(im,[obj.inputSize(1), NaN]);
+                im = snapshot(obj.camera); %カメラ画像情報の取得
+                imResized = imresize(im,[obj.inputSize(1), NaN]); % ネットワークごとに入力サイズが異なるので変更
                 imageActivations = activations(obj.net,imResized,obj.layerName);    
                 [scores, classIds, classActivationMap] = obj.calc_score(imageActivations);
                 maxScores = scores(classIds);
@@ -51,7 +51,8 @@ classdef DLCameraBase < handle
                 subplot(1, 2, 1)
                 imshow(im)
                 subplot(1, 2, 2)
-                obj.show_cam(im,classActivationMap)
+                combinedImage = obj.getCombinedImage(im,classActivationMap);
+                imshow(combinedImage);
                 %title(string(labels) + ", " + string(maxScores));
                 titleLabel1 = sprintf('%s : %.1f%%', obj.japaneseLabels.getJpName(classIds(1)), maxScores(1) * 100);
                 title(titleLabel1);
@@ -77,7 +78,7 @@ classdef DLCameraBase < handle
     end
     
     methods (Access = private)
-        function show_cam(obj, im, activationMap)
+        function combinedImage = getCombinedImage(obj, im, activationMap)
             imSize = size(im);
             activationMap = imresize(activationMap,imSize(1:2));
             activationMap = obj.normalizeImage(activationMap);
@@ -87,7 +88,7 @@ classdef DLCameraBase < handle
 
             combinedImage = double(rgb2gray(im))/2 + activationMap;
             combinedImage = obj.normalizeImage(combinedImage)*255;
-            imshow(uint8(combinedImage));
+            combinedImage = uint8(combinedImage); 
         end
         
         function N = normalizeImage(~, I)
