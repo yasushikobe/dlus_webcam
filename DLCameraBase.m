@@ -77,15 +77,15 @@ classdef DLCameraBase < handle
     end
     
     methods (Access = private)
-        function show_cam(obj, im, CAM)
+        function show_cam(obj, im, activationMap)
             imSize = size(im);
-            CAM = imresize(CAM,imSize(1:2));
-            CAM = obj.normalizeImage(CAM);
-            CAM(CAM<0.2) = 0;
+            activationMap = imresize(activationMap,imSize(1:2));
+            activationMap = obj.normalizeImage(activationMap);
+            activationMap(activationMap<0.2) = 0;
             cmap = jet(255).*linspace(0,1,255)';
-            CAM = ind2rgb(uint8(CAM*255),cmap)*255;
+            activationMap = ind2rgb(uint8(activationMap*255),cmap)*255;
 
-            combinedImage = double(rgb2gray(im))/2 + CAM;
+            combinedImage = double(rgb2gray(im))/2 + activationMap;
             combinedImage = obj.normalizeImage(combinedImage)*255;
             imshow(uint8(combinedImage));
         end
